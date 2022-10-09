@@ -10,13 +10,13 @@ using System.Threading.Tasks;
 
 namespace BasicWebApi.DataAccessLayer.Configuration
 {
-    internal class OrderConfiguration : BaseEntityConfiguration<Order>
+    internal class OrderConfiguration : BaseEntityConfiguration<Orders>
     {
-        public override void Configure(EntityTypeBuilder<Order> builder)
+        public override void Configure(EntityTypeBuilder<Orders> builder)
         {
             base.Configure(builder);
 
-            builder.ToTable("Orders");
+           
 
             builder.Property(x => x.CreationDate).HasColumnName("ORD_DT");
             builder.Property(x => x.Status).HasConversion<string>();

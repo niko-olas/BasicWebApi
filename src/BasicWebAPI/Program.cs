@@ -9,6 +9,7 @@ using FluentValidation.AspNetCore;
 using BasicWebApi.BusinessLayer.Validation;
 using MicroElements.Swashbuckle.FluentValidation.AspNetCore;
 using Hellang.Middleware.ProblemDetails;
+using SimpleAuthentication;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,7 +19,6 @@ builder.Host.UseSerilog((hostingContext, loggerConfiguration) =>
 });
 
 
-// Add services to the container.
 builder.Services.AddControllers()
 .AddJsonOptions(options =>
  {
@@ -26,6 +26,10 @@ builder.Services.AddControllers()
      options.JsonSerializerOptions.Converters.Add(new UtcDateTimeConverter());
      options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
  });
+
+
+builder.Services.AddSimpleAuthentication(builder.Configuration);
+
 
 // Mapper
 builder.Services.AddAutoMapper(typeof(OrderMapperProfile).Assembly);
@@ -37,12 +41,19 @@ builder.Services.AddFluentValidation(options =>
 });
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen()
+builder.Services
+    .AddEndpointsApiExplorer();
+builder.Services
+    .AddSwaggerGen(options =>
+{
+    options.AddSimpleAuthentication(builder.Configuration);
+})
     .AddFluentValidationRulesToSwagger(options =>
     {
         options.SetNotNullableIfMinLengthGreaterThenZero = true;
     });
+
+
 
 // DBContext
 builder.Services.AddDbContext<DataContext>(options =>
@@ -52,9 +63,8 @@ builder.Services.AddDbContext<DataContext>(options =>
         //sqlOptions.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
     });
 });
-builder.Services.AddScoped<IReadOnlyDataContext>(services => services.GetRequiredService<DataContext>());
+//builder.Services.AddScoped<IReadOnlyDataContext>(services => services.GetRequiredService<DataContext>());
 builder.Services.AddScoped<IDataContext>(services => services.GetRequiredService<DataContext>());
-
 
 
 //Service
@@ -93,6 +103,8 @@ app.UseSerilogRequestLogging(options =>
 {
     options.IncludeQueryInRequestPath = true;
 });
+
+app.UseAuthenticationAndAuthorization();
 
 app.UseAuthorization();
 

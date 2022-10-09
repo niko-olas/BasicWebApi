@@ -26,8 +26,8 @@ namespace BasicWebApi.BusinessLayer.Services
 
         public async Task<IEnumerable<Models.Order>> GetOrders()
         {
-            var query = base.Context.GetData<Entities.Order>();
-
+            var query = base.Context.GetData<Entities.Orders>();
+           
             var orders = await query.OrderByDescending(o => o.CreationDate)
                 .ProjectTo<Models.Order>(base.Mapper.ConfigurationProvider)
                 .ToListAsync();
@@ -39,12 +39,12 @@ namespace BasicWebApi.BusinessLayer.Services
 
         public async Task<Order> SaveAsync(SaveOrder order)
         {
-            var dbOrder = order.Id != null ? await Context.GetData<Entities.Order>(trackingChanges: true)
+            var dbOrder = order.Id != null ? await Context.GetData<Entities.Orders>(trackingChanges: true)
            .FirstOrDefaultAsync(o => o.Id == order.Id) : null;
 
             if (dbOrder == null)
             {
-                dbOrder = Mapper.Map<Entities.Order>(order);
+                dbOrder = Mapper.Map<Entities.Orders>(order);
                 dbOrder.CreationDate = DateTime.UtcNow;
                 dbOrder.Status = OrderStatus.New;
 

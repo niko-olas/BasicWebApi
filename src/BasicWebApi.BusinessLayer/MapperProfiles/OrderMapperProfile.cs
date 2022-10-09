@@ -16,10 +16,10 @@ namespace BasicWebApi.BusinessLayer.MapperProfiles
         public OrderMapperProfile()
         {
             
-            CreateMap<Entities.Order, Models.Order>();
+            CreateMap<Entities.Orders, Models.Order>();
             //.ForMember(dst => dst.Status, opt => opt.MapFrom(source => source.OrderStatus.Name));
 
-            CreateMap<Models.Req.Order.SaveOrder, Entities.Order>();
+            CreateMap<Models.Req.Order.SaveOrder, Entities.Orders>();
         }
     }
 }
