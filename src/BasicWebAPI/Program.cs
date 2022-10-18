@@ -10,6 +10,7 @@ using BasicWebApi.BusinessLayer.Validation;
 using MicroElements.Swashbuckle.FluentValidation.AspNetCore;
 using Hellang.Middleware.ProblemDetails;
 using SimpleAuthentication;
+using OperationResults.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -30,6 +31,13 @@ builder.Services.AddControllers()
 
 builder.Services.AddSimpleAuthentication(builder.Configuration);
 
+// Operation Result
+builder.Services.AddOperationResult(options =>
+{
+    options.ErrorResponseFormat = ErrorResponseFormat.Default;
+},
+updateModelStateResponseFactory: true,
+validationErrorDefaultMessage: "Errors occurred");
 
 // Mapper
 builder.Services.AddAutoMapper(typeof(OrderMapperProfile).Assembly);

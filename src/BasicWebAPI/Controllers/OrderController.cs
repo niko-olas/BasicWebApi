@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using BasicWebApi.BusinessLayer.Services.Interface;
 using BasicWebApi.Shared.Models.Req.Order;
+using OperationResults.AspNetCore;
 
 namespace BasicWebAPI.Controllers
 {
@@ -17,14 +18,14 @@ namespace BasicWebAPI.Controllers
         public async Task<IActionResult> GetList()
         {
             var orders = await orderService.GetOrders();
-            return Ok(orders);
+            return HttpContext.CreateResponse(orders);
         }
 
         [HttpPost]
         public async Task<IActionResult> Save(SaveOrder order)
         {
             var savedOrder = await orderService.SaveAsync(order);
-            return Ok(savedOrder);
+            return HttpContext.CreateResponse(savedOrder);
         }
 
 
