@@ -4,8 +4,8 @@ using BasicWebApi.BusinessLayer.Services.Common;
 using BasicWebApi.BusinessLayer.Services.Interface;
 using BasicWebApi.DataAccessLayer;
 using BasicWebApi.Shared.Enums;
-using BasicWebApi.Shared.Models;
 using BasicWebApi.Shared.Models.Req.Order;
+using BasicWebApi.Shared.Models.Res.Order;
 using Microsoft.EntityFrameworkCore;
 using OperationResults;
 using System;
@@ -30,12 +30,12 @@ namespace BasicWebApi.BusinessLayer.Services
             var query = base.Context.GetData<Entities.Orders>();
            
             var orders = await query.OrderByDescending(o => o.CreationDate)
-                .ProjectTo<Models.Order>(base.Mapper.ConfigurationProvider)
+                .ProjectTo<Order>(base.Mapper.ConfigurationProvider)
                 .ToListAsync();
 
-            //var people = mapper.Map<IEnumerable<Order>>(dbOrder);
+            return orders;
+           
 
-            return Result.Fail(FailureReasons.ClientError, "Unable to create a person with same first name and surname within 1 minute");
         }
 
         public async Task<Result<Order>> SaveAsync(SaveOrder order)

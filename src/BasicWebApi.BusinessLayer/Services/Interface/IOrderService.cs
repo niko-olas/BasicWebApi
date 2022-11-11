@@ -1,5 +1,5 @@
-﻿using BasicWebApi.Shared.Models;
-using BasicWebApi.Shared.Models.Req.Order;
+﻿using BasicWebApi.Shared.Models.Req.Order;
+using BasicWebApi.Shared.Models.Res.Order;
 using OperationResults;
 
 namespace BasicWebApi.BusinessLayer.Services.Interface

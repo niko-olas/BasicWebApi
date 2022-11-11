@@ -11,6 +11,11 @@ using MicroElements.Swashbuckle.FluentValidation.AspNetCore;
 using Hellang.Middleware.ProblemDetails;
 using SimpleAuthentication;
 using OperationResults.AspNetCore;
+using System.Reflection;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.Net.Http.Headers;
+using Microsoft.OpenApi.Any;
+using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,9 +24,8 @@ builder.Host.UseSerilog((hostingContext, loggerConfiguration) =>
     loggerConfiguration.ReadFrom.Configuration(hostingContext.Configuration);
 });
 
-
 builder.Services.AddControllers()
-.AddJsonOptions(options =>
+    .AddJsonOptions(options =>
  {
      options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault;
      options.JsonSerializerOptions.Converters.Add(new UtcDateTimeConverter());
@@ -55,6 +59,37 @@ builder.Services
     .AddSwaggerGen(options =>
 {
     options.AddSimpleAuthentication(builder.Configuration);
+
+    options.SwaggerDoc("v1", new OpenApiInfo { Title = "Basic Web", Version = "v1" });
+
+
+    options.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = JwtBearerDefaults.AuthenticationScheme
+                }
+            },
+            Array.Empty<string>()
+        }
+    });
+
+    options.MapType<DateTime>(() => new OpenApiSchema
+    {
+        Type = "string",
+        Format = "date-time",
+        Example = new OpenApiString(new DateTime(2022, 04, 08, 16, 22, 0).ToString("yyyy-MM-ddTHH:mm:ssZ"))
+    });
+
+    options.UseAllOfToExtendReferenceSchemas();
+
+    var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+    var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+    options.IncludeXmlComments(xmlPath);
 })
     .AddFluentValidationRulesToSwagger(options =>
     {
@@ -85,7 +120,7 @@ builder.Services.Scan(scan => scan.FromAssemblyOf<OrderService>()
 
 builder.Services.AddProblemDetails(options =>
 {
-    options.Map<ApplicationException>(ex =>
+    options.Map<Exception>(ex =>
     new StatusCodeProblemDetails(StatusCodes.Status503ServiceUnavailable)
     {
         Title = "Services Unavailable"
@@ -100,11 +135,17 @@ app.UseHttpsRedirection();
 
 app.UseProblemDetails();
 
+app.UseSwagger();
+app.UseSwaggerUI(options =>
+{
+    options.RoutePrefix = string.Empty;
+    options.SwaggerEndpoint("/swagger/v1/swagger.json", "Basic API");
+});
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
+  
 }
 
 app.UseSerilogRequestLogging(options =>
